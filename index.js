@@ -2,9 +2,9 @@ require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
-const Level = require("../SLK Discord Bot/models/profileSchema");
+const Level = require("./models/profileSchema");
 const { DISCORD_TOKEN: token, MONGODB_SRV: database } = process.env;
-const calculateLevelXp = require("../SLK Discord Bot/utils/calculateLevelXp");
+const calculateLevelXp = require("./utils/calculateLevelXp");
 
 // Require the necessary discord.js classes
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
