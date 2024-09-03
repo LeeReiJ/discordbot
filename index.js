@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
 const Level = require("./models/profileSchema");
+const keep_alive = require('./keep_alive.js');
 const { DISCORD_TOKEN: token, MONGODB_SRV: database } = process.env;
 const calculateLevelXp = require("./utils/calculateLevelXp");
 
