@@ -15,13 +15,13 @@ module.exports = {
   async execute(interaction) {
     let matchEnded = false;
 
+    // Acknowledge the interaction to avoid timeout
+    await interaction.deferReply();
+
     const embed = {
       color: 0xfae5c2,
       title: "-------------내전 신청서-------------",
-      description: createInitialEmbedDescription(
-        joinedUsers,
-        interaction.guild
-      ),
+      description: createInitialEmbedDescription(joinedUsers, interaction.guild),
     };
 
     const roleOptions = [
@@ -46,10 +46,9 @@ module.exports = {
       ],
     };
 
-    const message = await interaction.reply({
+    const message = await interaction.editReply({
       embeds: [embed],
       components: [actionRow],
-      fetchReply: true,
     });
 
     const najeonRole = interaction.guild.roles.cache.find(
@@ -208,82 +207,8 @@ module.exports = {
 
     collector.on("end", (collected, reason) => {
       if (reason === "end") {
-        // Do not reset the joinedUsers object or update the embed
-        // Just stop the collector, which will disable further interactions
-        // Optionally, you can add a follow-up message saying the match has ended
         interaction.followUp("내전이 종료되었습니다. 최종 상태가 유지됩니다.");
       }
     });
   },
 };
-
-// Function to create the initial embed description with columns
-function createInitialEmbedDescription(joinedUsers, guild) {
-  const columns = ["탑", "정글", "미드", "원딜", "서폿"];
-  let description = columns
-    .map((role) => {
-      return `${role}:\n${
-        joinedUsers[role]
-          .map(
-            (user, index) =>
-              `${index + 1}. ${
-                guild.members.cache.get(user.id)?.displayName || "Unknown"
-              } (Rank: ${user.rank})`
-          )
-          .join("\n") || "없음"
-      }`;
-    })
-    .join("\n\n");
-  return description;
-}
-
-// Function to create the embed description with columns
-function createEmbedDescription(joinedUsers, guild) {
-  const columns = ["탑", "정글", "미드", "원딜", "서폿"];
-  let description = columns
-    .map((role) => {
-      return `${role}:\n${
-        joinedUsers[role]
-          .map(
-            (user, index) =>
-              `${index + 1}. ${
-                guild.members.cache.get(user.id)?.displayName || "Unknown"
-              } (Rank: ${user.rank})`
-          )
-          .join("\n") || "없음"
-      }`;
-    })
-    .join("\n\n");
-  return description;
-}
-
-// Function to get the user's rank
-async function getUserRank(userId, serverId) {
-  const userRank = await LolRank.findOne({ userId, serverId });
-  return userRank ? userRank.rank : "Unknown";
-}
-
-// Function to update Churu balance
-async function updateChuru(userId, serverId, churuChange) {
-  let churuUser = await Churro.findOne({ userId, serverId });
-
-  // If user doesn't have a profile, create one
-  if (!churuUser) {
-    churuUser = await Churro.create({
-      userId,
-      serverId,
-      churu: 0,
-      level: 1,
-      xp: 0,
-      lastDaily: null,
-    });
-  }
-
-  churuUser.churu += churuChange;
-
-  if (churuUser.churu < 0) {
-    churuUser.churu = 0; // Ensure churu doesn't go below 0
-  }
-
-  await churuUser.save();
-}
